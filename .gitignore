@@ -1,0 +1,14 @@
+concordance/halfworkingmulti.rs
+concordance/korpus
+concordance/token.txt
+concordance/target/
+concordance/find-word/korpus
+concordance/index-file.txt
+concordance/token.txt
+concordance/magic-file.txt
+korpus
+chasing-subs/target/
+multimatching/target/
+power-strings/target/
+concordance/find-word/target/
+radio/target/*

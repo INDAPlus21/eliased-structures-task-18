@@ -57,7 +57,7 @@ use std::io::prelude::*;
     }
 } */
 
-/* fn kmp(pattern: String, text: String) {
+fn kmp(pattern: String, text: String) {
     let lps_array = create_lps(&pattern); 
     let pattern_length = pattern.len(); 
 
@@ -106,48 +106,14 @@ fn create_lps(pattern: &String) -> Vec<usize> {
     // println!("{:?}", lps_array); 
 
     return lps_array;
-} */ 
-
-
-/* fn aho_corastick(patterns: Vec<String>) {
-    let mut max_states = 0; 
-    
-    for pattern in patterns {
-        max_states += pattern.len();
-    } 
-} */
-
-fn add_string(s: String) {
-    v = 0; 
-    for c in s.chars() {
-        c = char - "a"; 
-        if (tire[v],next[c] == -1) {
-            trie[v].next[c] = trie.size()
-        }
-    }
 }
 
 fn main() {
-    let K = 26; 
-
-    struct Vertex {
-        next: i8, 
-        leaf: bool, 
-        p: i8,  
-        pch: char, 
-        link: i8, 
-        go: i8 
-    }
-
-    
-
-
-
     // create_lps("ABCDABD".to_string()); 
     // kmp("p".to_string(), "Popup".to_string());
     // kmp("pup".to_string(), "Popup".to_string());
 
-    /* let input = io::stdin();
+    let input = io::stdin();
 
     let mut num_patterns = 0;
     let mut input_iter = 0;
@@ -157,15 +123,13 @@ fn main() {
         if input_iter == 0 {
             num_patterns = line.trim().parse().expect("int");
         } else if input_iter == num_patterns + 1 {
-            // let text = line; // std::str::from_utf8(line).unwrap().to_string(); 
+            let text = line; // std::str::from_utf8(line).unwrap().to_string(); 
             //.as_bytes();
 
             // check_pattern(patterns, text);
-            /* for pattern in patterns {
+            for pattern in patterns {
                 kmp(pattern, text.clone());
-            } */
-
-            aho_corastick(patterns); 
+            }
 
             // println!("i'm here");
 
@@ -176,5 +140,5 @@ fn main() {
         }
 
         input_iter += 1;
-    } */
+    }
 }

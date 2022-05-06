@@ -1,0 +1,300 @@
+use std::collections::HashMap;
+use std::io;
+use std::io::prelude::*;
+use std::time::{Duration, SystemTime};
+
+/* fn count_fragment(fragment: &str) -> Vec<u8> {
+    let mut same_characters = vec![];
+    let mut same_position = 1;
+    let mut previous_letter: char = '#';
+    for i in 0..fragment.len() {
+        // println!("letter: {}", fragment.as_bytes()[i] as char);
+        // println!("previous: {}", previous_letter);
+        if i == fragment.len() - 1 {
+            same_characters.push(same_position);
+        } else if fragment.as_bytes()[i] != fragment.as_bytes()[i + 1] {
+            // println!("pushing: {}", same_position);
+            same_characters.push(same_position);
+            same_position = 1;
+        } else {
+            same_position += 1;
+        }
+        // previous_letter = letter;
+    }
+    return same_characters;
+} */
+
+/* fn check_fragment(secret_message: &str, fragment: &str) {
+    let fragment_count = count_fragment(fragment);
+    // eprintln!("fragment_count: {:?}", fragment_count);
+
+    let mut num_matches = 0;
+    let mut string_match = ""; // undefined if no match // : &str;
+
+    for i in 0..secret_message.len() - fragment.len() {
+        let secret_count = count_fragment(&secret_message[i..i + fragment.len()]);
+        // eprintln!("secret_count: {:?}", secret_count);
+        if count_fragment(&secret_message[i..i + fragment.len()]) == fragment_count {
+            // eprintln!("found: {:?}", &secret_message[i..i+fragment.len()]);
+            string_match = &secret_message[i..i + fragment.len()];
+            num_matches += 1;
+        }
+
+        // secret_message.as_bytes()[i..i+fragment.len()]
+        // secret_message.as_bytes()[i]
+    }
+
+    if num_matches > 1 && string_match != "" {
+        println!("{:?}", num_matches);
+    } else if num_matches == 0 {
+        println!("{:?}", num_matches);
+    } else if string_match != "" {
+        println!("{}", string_match);
+    }
+}*/
+
+// if we have secretmessage
+// boot 
+// A=1, B=2, C=3, D=4, E=5, F =6, G=7, H=8, I =9, J = 10, K = 11, L = 12, M = 13, N = 14, O = 15, 
+// P = 16, Q = 17, R = 18, S = 19, T = 20, U = 21, V = 22, W = 23, X = 24, Y = 25, Z = 26,
+// you could do secretmessage and devide it up into [19, 5, 3, 18, 5, 20, 13, 5, 19, 19, 1, 7, 5]
+// The relevant thing is whether there is a sequence of the same number twice surrounded by not that number 
+// and you need to be able to represent all the different numbers in that way...  
+// [2, 15, 15, 20] 
+// if array[i] != array[i+1] && array[i+1] == array[i+2] && array[i] != array[i+3]
+// increment by 1  
+// 
+
+fn unique_fragment(secret_message: &str, fragment: &str) {
+    let mut count_matches = 0;
+    let mut message_to_print = "";
+    // let frag_chars = fragment.as_bytes()[j] as char;
+    // let secret_char = secret_message.as_bytes()[i + j] as char;
+    let mut letter_map: HashMap<char, char> = HashMap::new();
+    let mut used_letters: Vec<char> = vec![];
+
+    for i in 0..secret_message.len() - fragment.len() + 1 {
+        let mut match_possible = true;
+        for (j, frag_char) in fragment.chars().enumerate() {
+            let secret_char = secret_message.as_bytes()[i + j] as char;
+            let has_used_letter = used_letters.contains(&secret_char);
+            // let mut used_letters: Vec<char> = letter_map.into_values().collect();
+            let decrypted_letter = letter_map.get(&frag_char);
+
+            if (decrypted_letter != None || has_used_letter) && decrypted_letter != Some(&secret_char) {
+                match_possible = false;
+                break;
+                // eprintln!("wrong! {}", secret_char);
+            }
+
+            letter_map.insert(frag_char, secret_char);
+            used_letters.push(secret_char);
+            eprintln!("letter_map: {:?}", letter_map);
+        }
+        if match_possible {
+            eprintln!("{}", &secret_message[i..i + fragment.len()]);
+            count_matches += 1;
+            if count_matches == 1 {
+                message_to_print = &secret_message[i..i + fragment.len()];
+            }
+        }
+        letter_map.clear();
+        used_letters.clear();
+        // eprintln!("possible! {}", match_possible);
+        // println!("{:?}", letter_map);
+    }
+
+    if count_matches == 1 {
+        println!("{}", message_to_print);
+    } else {
+        println!("{}", count_matches);
+    }
+}
+
+/*fn next_letter_fragment(secret_frag: &str) -> i8 {
+    secret_frag.find("i", 5);
+    return 1
+}*/
+
+/* fn faster(secret_message: &str, fragment: &str) {
+    let mut count_matches = 0;
+    let mut message_to_print = "";
+    let mut all_indexes_map = HashMap::new();
+    // for frag_char in fragment.chars() {
+    for temp_secr_char in secret_message.chars() {
+        let long_lived = temp_secr_char;
+        if all_indexes_map.get(&temp_secr_char) == None {
+            let matches: Vec<_> = secret_message.match_indices(temp_secr_char).collect();
+            /*for tuple in matches {
+                some_map.insert(long_lived, tuple.0);
+            }*/
+            all_indexes_map.insert(long_lived, matches);
+        }
+    }
+
+    let mut all_fragment_map = HashMap::new();
+    for temp_frag_char in fragment.chars() {
+        let long_lived = temp_frag_char;
+        if all_fragment_map.get(&temp_frag_char) == None {
+            let matches: Vec<_> = fragment.match_indices(temp_frag_char).collect();
+            /*for tuple in matches {
+                some_map.insert(long_lived, tuple.0);
+            }*/
+            all_fragment_map.insert(long_lived, matches);
+        }
+    }
+
+    // println!("{:?}", all_indexes_map);
+    // println!("{:?}", all_fragment_map);
+
+    // let matches : Vec<_> = secret_message[i..i + fragment.len()].match_indices(secret_char).collect();
+    // let mut all_secret_matches = secret_message.match_indices(secret_char).7collect();
+
+    for i in 0..secret_message.len() - fragment.len() + 1 {
+        let mut match_possible = true;
+
+        for (j, frag_char) in fragment.chars().enumerate() {
+            let secret_char = secret_message.as_bytes()[i + j] as char;
+            let matches = all_indexes_map.get(&secret_char).unwrap(); // secret_message[i..i + fragment.len()].match_indices(secret_char).collect();
+                                                                              //  : &mut Vec<(usize, &str)>
+            let frag_matches /* : Vec<_>*/ = all_fragment_map.get(&frag_char).unwrap(); // fragment.match_indices(frag_char).collect();
+
+            // println!("{:?} {:?}", matches, frag_matches); //[0].0);
+
+            /* if matches.len() != frag_matches.len() {
+                match_possible = false;
+                break;
+            } */
+
+            // let mut z: i8 = 0;
+            // println!("{} matches before remove: {:?}", i, matches); 
+            // let mut removed_matches = vec![];  
+            let mut match_iter = 0; 
+            for z in 0..matches.len() {
+                if matches[z].0 >= i
+                    && matches[z].0 < i + fragment.len() 
+                {
+                    if match_iter < frag_matches.len() {
+                        if matches[z].0 - i != frag_matches[match_iter].0 {
+                            match_possible = false;
+                            break; // should break again in above loop (?) no.    
+                        }
+                        match_iter += 1; 
+                    }
+                    // removed_matches.push(matches[z]); 
+                    // matches.remove(inte as usize);
+                    // inte -= 1;
+                }
+            }
+            // i'm fucking removing. no new! 
+
+            // println!("{:?} || {:?} || {:?}", i, removed_matches, frag_matches); //[0].0);
+
+            /*if removed_matches.len() != frag_matches.len() {
+                match_possible = false;
+                break;
+            }*/
+
+            //  if !(matches[k].0 >= i && matches[k].0 < i + fragment.len() + 1) {
+            /*for k in 0..removed_matches.len() {
+                // println!("{:?} {:?} {:?} {:?}", k, i, i + fragment.len() + 1, to_subtract); //[0].0);
+                if removed_matches[k].0 - i != frag_matches[k].0 {
+                    // println!("changing to false"); //[0].0);
+                    match_possible = false;
+                    break; // should break again in above loop (?) no.
+                }
+            }*/
+
+            /*for tuple in matches {
+                let frag_char_nested = fragment.as_bytes()[tuple.0] as char;
+                // let secret_char = secret_message.as_bytes()[i + tuple.0] as char;
+
+                println!("{:?} {:?}", frag_char_nested, secret_char); //[0].0);
+
+                if frag_char_nested != secret_char {
+                    match_possible = false;
+                }
+            }*/
+        }
+        if match_possible {
+            // eprintln!("{}", &secret_message[i..i + fragment.len()]);
+            count_matches += 1;
+            if count_matches == 1 {
+                message_to_print = &secret_message[i..i + fragment.len()];
+            }
+        }
+        // eprintln!("possible! {}", match_possible);
+        // println!("{:?}", letter_map);
+    }
+
+    if count_matches == 1 {
+        println!("{}", message_to_print);
+    } else {
+        println!("{}", count_matches);
+    }
+} */
+
+fn main() {
+    // let secret_message = "secretmessage";
+    // let fragment = "boot";
+    // let secret_message = "treetreetreetree";
+    // let fragment = "wood";
+    // let secret_message = "oranges";
+    // let fragment = "apples";
+    // let alphabet = "abcdefghijklmnoqprstvuw";
+    // archipelago
+    // submarine
+
+    // let matches : Vec<_> = "helleoe".match_indices("e").collect();
+
+    // for tuple in matches {
+    //     println!("{:?}", tuple.0) //[0].0);
+    // }
+
+    // println!("{:?}", matches) //[0].0);
+
+    // let mut used_letters: Vec<char> = vec![];
+
+    // let mut used_letters: Vec<char> = vec![];
+
+    // used_letters.push();
+
+    // unique_fragment(&"treet", &"wood");
+
+    // faster(&"secretmessage", &"boot");
+    // faster(&"treetreetreetree", &"wood");
+    // faster(&"oranges", &"apples");
+    // faster(&"archipelago", &"submarine");
+
+    // Right. it must be UNIQUE letters, you can't just count them
+    /*let now = SystemTime::now();
+    for i in 0..100 {
+        unique_fragment(&"treet", &"wood");
+        unique_fragment(&"treetreetreetree", &"wood");
+        unique_fragment(&"secretmessage", &"boot");
+        unique_fragment(&"oranges", &"apples");
+        unique_fragment(&"ilol", &"aplp");
+        unique_fragment(&"ilolioio", &"aplp");
+    }
+    println!("ms: {:?}", now.elapsed().unwrap().as_millis());*/
+
+    // 24/46 accepted
+
+    let input = io::stdin();
+
+    let mut input_iter = 0;
+    let mut orders = vec![];
+
+    for line in input.lock().lines().map(|line| line.unwrap()) {
+        if input_iter == 0 {
+            orders.push(line);
+        } else if input_iter == 1 {
+            unique_fragment(&orders[0], &line);
+            // faster(&orders[0], &line);
+            orders.remove(0);
+            input_iter = -1;
+        }
+
+        input_iter += 1;
+    }
+}
