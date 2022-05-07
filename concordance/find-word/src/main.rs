@@ -48,7 +48,13 @@ fn main() -> Result<(), Box<dyn Error>> {
         
                 if hash == magic_hash {
                     let indexes = &string_index_file.as_bytes()[byte_index+1..byte_index+100000];
+
+                    // println!("indexes: {:?}", indexes);
+
                     let indexes_string =  String::from_utf8_lossy(indexes); 
+
+                    println!("indexes string: {:?}", indexes_string);
+
                     let mut indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>(); 
                     let mut real_indexes_array = vec![]; 
     
@@ -94,6 +100,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     
                         let korpus_line = &byte_korpus[number_index-50..number_index+50];
                         let korpus_string = String::from_utf8_lossy(korpus_line); 
+                        print!("..."); 
                         for c in korpus_string.chars() {
                             if c != '\n' {
                                 print!("{}", c); 
@@ -102,13 +109,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                         // println!("rad: {}", korpus_string); 
                         korpus_iter += 1; 
     
+                        println!("..."); 
                         if korpus_iter > 25 {
                             break 'outer;
                         }
     
-                        println!(); 
                     }
-            
                 }
             }
         } 
