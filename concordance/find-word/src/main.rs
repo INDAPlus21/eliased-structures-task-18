@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // let mut index_file = File::open("../index-file.txt")?;
 
-    // det går SNABBARE när man läser det till en sträng istället för en byte array 
+    // det går SNABBARE när man läser det till en sträng istället för en byte array
     let magic_contents: String = fs::read_to_string("../magic-file.txt")?.parse()?;
 
     // let magic_contents = fs::read("../magic-file.txt")?;
@@ -47,6 +47,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         input_word = input_word.to_lowercase();
 
         // could convert the magic file to a hash map, alternatively sort it
+        // it's good now, could improve it even further by having the same hashes on the
+        // same lines
         let hash = hash(&input_word);
         // println!("{}", hash);
 
@@ -66,76 +68,82 @@ fn main() -> Result<(), Box<dyn Error>> {
                 // println!("{:?}", split);
 
                 let magic_hash: u16 = split[0].parse().unwrap();
-                let byte_index: usize = split[1].parse().unwrap();
 
                 // println!("{}", magic_hash);
 
                 if hash == magic_hash {
-                    let quick_word =
-                        &index_file.as_bytes()[byte_index..byte_index + input_byte_length];
+                    let byte_indexes = split[1..].into_iter().map(|x| x.parse::<usize>().unwrap()); //::<Vec<usize>>(); //.parse().unwrap();
 
-                    if quick_word == input_word.as_bytes() {
-                        println!("Att hitta ordet tog: {:.2?}", start.elapsed());
-                        let indexes = &index_file.as_bytes()
-                            [byte_index + input_byte_length + 1..byte_index + 100000];
+                    for byte_index in byte_indexes {
+                        let quick_word =
+                            &index_file.as_bytes()[byte_index..byte_index + input_byte_length];
 
-                        // println!("indexes: {:?}", indexes);
+                        if quick_word == input_word.as_bytes() {
+                            println!("Att hitta ordet tog: {:.2?}", start.elapsed());
+                            let indexes = &index_file.as_bytes()
+                                [byte_index + input_byte_length + 1..byte_index + 100000];
 
-                        let indexes_string = String::from_utf8_lossy(indexes);
+                            // println!("indexes: {:?}", indexes);
 
-                        let mut indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>();
+                            let indexes_string = String::from_utf8_lossy(indexes);
 
-                        let matched_word = indexes_array[0];
-                        // println!("matched: {:?}", matched_word);
+                            let mut indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>();
 
-                        // println!("indexes string: {:?}", indexes_string);
-                        let mut real_indexes_array = vec![];
+                            let matched_word = indexes_array[0];
+                            // println!("matched: {:?}", matched_word);
 
-                        // println!("all {:?}", &indexes_array);
+                            // println!("indexes string: {:?}", indexes_string);
+                            let mut real_indexes_array = vec![];
 
-                        for (index_array_iter, index) in indexes_array.iter().enumerate() {
-                            if index.contains("\n") {
-                                for (i, c) in indexes_array[index_array_iter].chars().enumerate() {
-                                    if c == '\n' {
-                                        indexes_array[index_array_iter] =
-                                            &indexes_array[index_array_iter][..i as usize]
+                            // println!("all {:?}", &indexes_array);
+
+                            for (index_array_iter, index) in indexes_array.iter().enumerate() {
+                                if index.contains("\n") {
+                                    for (i, c) in
+                                        indexes_array[index_array_iter].chars().enumerate()
+                                    {
+                                        if c == '\n' {
+                                            indexes_array[index_array_iter] =
+                                                &indexes_array[index_array_iter][..i as usize]
+                                        }
+                                    }
+
+                                    real_indexes_array =
+                                        indexes_array[0..index_array_iter + 1].to_vec();
+                                    break;
+                                }
+                            }
+
+                            // println!("real {:?}", &real_indexes_array);
+
+                            let times = real_indexes_array.len();
+                            let gång_er = if times > 1 { "gånger" } else { "gång" };
+
+                            println!(
+                                "\"{}\" förekommer {} {} i korpus",
+                                input_word, times, gång_er
+                            );
+
+                            for (korpus_iter, index) in real_indexes_array.iter().enumerate() {
+                                let number_index = index.parse::<usize>().unwrap();
+                                // println!("number index {:?}", number_index);
+
+                                let korpus_line =
+                                    &byte_korpus[number_index - 50..number_index + 50];
+                                let korpus_string = String::from_utf8_lossy(korpus_line);
+                                print!("...");
+                                for c in korpus_string.chars() {
+                                    if c != '\n' {
+                                        print!("{}", c);
+                                    } else {
+                                        print!(" ");
                                     }
                                 }
 
-                                real_indexes_array =
-                                    indexes_array[0..index_array_iter + 1].to_vec();
-                                break;
-                            }
-                        }
-
-                        // println!("real {:?}", &real_indexes_array);
-
-                        let times = real_indexes_array.len();
-                        let gång_er = if times > 1 { "gånger" } else { "gång" };
-
-                        println!(
-                            "\"{}\" förekommer {} {} i korpus",
-                            input_word, times, gång_er
-                        );
-
-                        for (korpus_iter, index) in real_indexes_array.iter().enumerate() {
-                            let number_index = index.parse::<usize>().unwrap();
-                            // println!("number index {:?}", number_index);
-
-                            let korpus_line = &byte_korpus[number_index - 50..number_index + 50];
-                            let korpus_string = String::from_utf8_lossy(korpus_line);
-                            print!("...");
-                            for c in korpus_string.chars() {
-                                if c != '\n' {
-                                    print!("{}", c);
-                                } else {
-                                    print!(" ");
+                                println!("...");
+                                if korpus_iter > 25 {
+                                    break 'outer;
                                 }
-                            }
-
-                            println!("...");
-                            if korpus_iter > 25 {
-                                break 'outer;
                             }
                         }
                     }
