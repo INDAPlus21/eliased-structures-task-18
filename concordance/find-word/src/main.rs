@@ -41,6 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let input = io::stdin();
 
+    // initialize spagetti code  
     for mut input_word in input.lock().lines().map(|line| line.unwrap()) {
         let start = Instant::now();
 
@@ -84,8 +85,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 [byte_index + input_byte_length + 1..byte_index + 100000];
 
                             // println!("indexes: {:?}", indexes);
+                            // lossy means that it replaces invalid characters with the "replacement character"
+                            // which here means 
 
                             let indexes_string = String::from_utf8_lossy(indexes);
+
+                            // okay the cause is that � is treated as a space (?) 
 
                             let mut indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>();
 
@@ -114,8 +119,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 }
                             }
 
-                            // println!("real {:?}", &real_indexes_array);
+                            println!("real {:?}", &real_indexes_array);
 
+                            // lite fin printing 
                             let times = real_indexes_array.len();
                             let gång_er = if times > 1 { "gånger" } else { "gång" };
 
@@ -151,7 +157,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        println!("Tog: {:.2?}", start.elapsed());
+        println!("Allt tog: {:.2?}", start.elapsed());
     }
 
     return Ok(());
