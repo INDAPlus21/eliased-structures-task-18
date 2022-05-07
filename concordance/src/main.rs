@@ -65,13 +65,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let contents: String = fs::read_to_string("token.txt")?.parse()?;
     let mut previous_word = "";
+    let mut previous_hash = 0;
 
     // println!("{:?}", hash("hello"));
 
     // To convert the byte slice back into a string slice, use the from_utf8 function.
     // let mut total_bytes = 0;
 
-    let split = contents.split("\n"); 
+    let split = contents.split("\n");
     let split_length = split.to_owned().count();
 
     for (i, line) in split.enumerate() {
@@ -83,11 +84,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         // println!("{:?}", byte_index); // första ordet är a, andra är byte indexen
 
         if previous_word != word {
-            index_file.write("\n".as_bytes());
+            if i != 0 {
+                index_file.write("\n".as_bytes())?;
+            }
 
             let metadata: u32 = index_file.metadata().unwrap().len() as u32;
 
-            index_file.write(word.as_bytes());
+            index_file.write(word.as_bytes())?;
+
             previous_word = word;
             // println!("{:?}", word); // första ordet är a, andra är byte indexen
 
@@ -99,11 +103,20 @@ fn main() -> Result<(), Box<dyn Error>> {
             // &transform_u32_to_array_of_u8(metadata)
 
             // magic_file.write(&hash.to_ne_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
-            magic_file.write(&hash.to_string().as_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
-            magic_file.write(" ".as_bytes())?;
-            // magic_file.write(&metadata.to_ne_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+
+            if previous_hash == hash {
+                magic_file.write(" ".as_bytes())?;
+                // magic_file.write(&metadata.to_ne_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+            } else {
+                if i != 0 {
+                    magic_file.write("\n".as_bytes())?;
+                }
+                previous_hash = hash;
+                magic_file.write(&hash.to_string().as_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
+                magic_file.write(" ".as_bytes())?;
+            }
             magic_file.write(&metadata.to_string().as_bytes())?; // &transform_u32_to_array_of_u8(metadata));
-            magic_file.write("\n".as_bytes());
+
             // magic_file.write();
 
             // ett alternativ till att kontinuerligt hålla koll på byte length
