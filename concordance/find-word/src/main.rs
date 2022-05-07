@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let indexes = &string_index_file.as_bytes()[byte_index+1..byte_index+100];
                 let indexes_string =  String::from_utf8_lossy(indexes); 
                 let indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>(); 
-                // println!("{:?}", String::from_utf8_lossy(indexes));
+                println!("{:?}", String::from_utf8_lossy(indexes_array));
                 
                 println!("Ordet förekommer {:?} gånger i korpus", indexes_array.len()); 
                 let mut korpus_iter = 0; 
