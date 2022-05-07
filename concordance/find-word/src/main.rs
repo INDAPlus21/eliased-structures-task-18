@@ -24,9 +24,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // let mut index_file = File::open("../index-file.txt")?;
 
+    // det går SNABBARE när man läser det till en sträng istället för en byte array 
     let magic_contents: String = fs::read_to_string("../magic-file.txt")?.parse()?;
 
-    let string_index_file: String = fs::read_to_string("../index-file.txt")?.parse()?;
+    // let magic_contents = fs::read("../magic-file.txt")?;
+
+    // let index_file = fs::read("../index-file.txt")?;
+
+    let index_file: String = fs::read_to_string("../index-file.txt")?.parse()?;
 
     // let byte_index_file = fs::read("../index-file.txt")?;
 
@@ -48,11 +53,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         let input_byte_length = input_word.as_bytes().len();
 
         // a's last byte index is 9962292, second to last is 9959364
-        // it's O(n) lookup time in the magic file, which it shouldn't be 
+        // it's O(n) lookup time in the magic file, which it shouldn't be
 
-        'outer: for line in magic_contents.split("\n") {
+        // split("\n")
+
+        'outer: for line in magic_contents.split("\n")
+        /* .lines().map(|line| line.unwrap()) */
+        {
             if line != "" {
-                let split = line.split(" ").collect::<Vec<_>>();
+                let split = line.split(" ").collect::<Vec<_>>(); // .split(" ").collect::<Vec<_>>();
 
                 // println!("{:?}", split);
 
@@ -62,13 +71,12 @@ fn main() -> Result<(), Box<dyn Error>> {
                 // println!("{}", magic_hash);
 
                 if hash == magic_hash {
-                    
                     let quick_word =
-                    &string_index_file.as_bytes()[byte_index..byte_index + input_byte_length];
-                    
+                        &index_file.as_bytes()[byte_index..byte_index + input_byte_length];
+
                     if quick_word == input_word.as_bytes() {
                         println!("Att hitta ordet tog: {:.2?}", start.elapsed());
-                        let indexes = &string_index_file.as_bytes()
+                        let indexes = &index_file.as_bytes()
                             [byte_index + input_byte_length + 1..byte_index + 100000];
 
                         // println!("indexes: {:?}", indexes);
@@ -140,4 +148,3 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     return Ok(());
 }
-
