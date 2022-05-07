@@ -37,8 +37,9 @@ The real requirement then is that a good hash function should distribute hash va
 
 "En konkordans är en databas där man kan slå upp ord och då få se alla förekomster av ordet tillsammans med orden närmast före och närmast efter i texten. Detta är ett stort hjälpmedel för lingvister som vill undersöka hur olika ord används i språket."
 
-
-
+// index file is just token.txt without duplicate words
+// the large text file isn't needed, it's only token that is actually needed
+// what??? good instructions have been here all along???
 
 */
 
@@ -55,40 +56,10 @@ fn hash(to_hash: &str) -> u16 {
     return sum;
 }
 
-/* fn transform_u32_to_array_of_u8(x:u32) -> [u8;4] {
-    let b1 : u8 = ((x >> 24) & 0xff) as u8;
-    let b2 : u8 = ((x >> 16) & 0xff) as u8;
-    let b3 : u8 = ((x >> 8) & 0xff) as u8;
-    let b4 : u8 = (x & 0xff) as u8;
-    return [b1, b2, b3, b4]
-} */
-
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("Hello, world!");
-    // let token = File::open("token.txt");
 
-    // index file is just token.txt without duplicate words
-    // the large text file isn't needed, it's only token that is actually needed
-    // what??? good instructions have been here all along???
-    // This file is simple so it can be skipped as long as you account for the change in your MagicFile (Having this file will be easier though!) All you want for this file is to not have duplicate words to make searching easier! The above words will instead look like this
-    // a 10000368 10017347 10047993 10058693 10067117 [...] \n
     let mut index_file = File::create("index-file.txt")?;
     let mut magic_file = File::create("magic-file.txt")?;
-
-    /*if let Ok(lines) = read_lines("./hosts") {
-        // Consumes the iterator, returns an (Optional) String
-        for line in lines {
-            if let Ok(ip) = line {
-                println!("{}", ip);
-            }
-        }
-    }
-
-    file.write_all(b"Hello, world!")?;
-    Ok(())*/
-
-    // let mut contents = String::new();
-    // token.read_to_string(&mut contents);
 
     let contents: String = fs::read_to_string("token.txt")?.parse()?;
     let content_vec = contents.split("\n"); //.collect();
@@ -114,7 +85,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             index_file.write("\n".as_bytes());
 
             let metadata: u32 = index_file.metadata().unwrap().len() as u32;
-            
+
             index_file.write(word.as_bytes());
             previous_word = word;
             // println!("{:?}", word); // första ordet är a, andra är byte indexen
@@ -165,14 +136,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         index_file.write(byte_index.as_bytes())?;
     }
 
-    // let metadata = fs::metadata("index-file.txt")?;
-    // let size = metadata.size_of();
-
-    // println!("{}", contents);
     println!("done"); 
 
     Ok(())
-
-    // assert_eq!(contents, "Hello, world!");
-    // Ok(())
 }
