@@ -5,6 +5,15 @@ use std::error::Error;
 use std::io::{self, prelude::*};
 use std::time::Instant;
 
+fn hash(to_hash: &str) -> u16 {
+    let mut sum = 0;
+    let upper_index = if to_hash.len() <= 3 { to_hash.len() } else { 3 };
+    for i in 0..upper_index {
+        sum += to_hash.as_bytes()[i] as u16;
+    }
+    sum
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     // eg all these have the same hash
     // println!("{:?}", hash("ale"));
@@ -39,6 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let input_byte_length = input_word.as_bytes().len();
 
         // a's last byte index is 9962292, second to last is 9959364
+        // it's O(n) lookup time in the magic file, which it shouldn't be 
 
         'outer: for line in magic_contents.split("\n") {
             if line != "" {
@@ -52,12 +62,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                 // println!("{}", magic_hash);
 
                 if hash == magic_hash {
+                    
                     let quick_word =
-                        &string_index_file.as_bytes()[byte_index..byte_index + input_byte_length];
-
+                    &string_index_file.as_bytes()[byte_index..byte_index + input_byte_length];
+                    
                     if quick_word == input_word.as_bytes() {
+                        println!("Att hitta ordet tog: {:.2?}", start.elapsed());
                         let indexes = &string_index_file.as_bytes()
-                            [byte_index + input_byte_length..byte_index + 100000];
+                            [byte_index + input_byte_length + 1..byte_index + 100000];
 
                         // println!("indexes: {:?}", indexes);
 
@@ -71,13 +83,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                         // println!("indexes string: {:?}", indexes_string);
                         let mut real_indexes_array = vec![];
 
-                        let mut index_array_iter = 0;
                         // println!("all {:?}", &indexes_array);
 
-                        for index in &indexes_array {
+                        for (index_array_iter, index) in indexes_array.iter().enumerate() {
                             if index.contains("\n") {
-                                // println!("contains n {:?}", indexes_array[index_array_iter]);
-
                                 for (i, c) in indexes_array[index_array_iter].chars().enumerate() {
                                     if c == '\n' {
                                         indexes_array[index_array_iter] =
@@ -86,12 +95,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 }
 
                                 real_indexes_array =
-                                    indexes_array[1..index_array_iter + 1].to_vec();
+                                    indexes_array[0..index_array_iter + 1].to_vec();
                                 break;
                             }
-                            index_array_iter += 1;
                         }
-                        // println!("{:?}", indexes_array);
 
                         // println!("real {:?}", &real_indexes_array);
 
@@ -134,11 +141,3 @@ fn main() -> Result<(), Box<dyn Error>> {
     return Ok(());
 }
 
-fn hash(to_hash: &str) -> u16 {
-    let mut sum = 0;
-    let upper_index = if to_hash.len() <= 3 { to_hash.len() } else { 3 };
-    for i in 0..upper_index {
-        sum += to_hash.as_bytes()[i] as u16;
-    }
-    return sum;
-}

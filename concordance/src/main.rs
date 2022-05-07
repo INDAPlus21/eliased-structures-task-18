@@ -6,6 +6,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 // use positioned_io::WriteAt;
 use std::os::unix::fs::FileExt;
+use std::time::Instant;
 
 /* Notes (i princip alla anteckningar är kopierade från andra källor)
 it's this concordance that is referred to: https://www.wikiwand.com/en/Concordance_(publishing)
@@ -57,23 +58,23 @@ fn hash(to_hash: &str) -> u16 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let mut start = Instant::now();
 
     let mut index_file = File::create("index-file.txt")?;
     let mut magic_file = File::create("magic-file.txt")?;
 
     let contents: String = fs::read_to_string("token.txt")?.parse()?;
-    let content_vec = contents.split("\n"); //.collect();
-    let mut previous_word = ""; // &str;
-                                // index_file.write("a".as_bytes());
-    let mut previous_hash = 0; // &str;
-
-    let mut total_bytes = 0;
+    let mut previous_word = "";
 
     // println!("{:?}", hash("hello"));
 
     // To convert the byte slice back into a string slice, use the from_utf8 function.
+    // let mut total_bytes = 0;
 
-    for line in contents.split("\n") {
+    let split = contents.split("\n"); 
+    let split_length = split.to_owned().count();
+
+    for (i, line) in split.enumerate() {
         let temp_vec = line.split(" ").collect::<Vec<_>>();
         let word = temp_vec[0]; //
         let byte_index = temp_vec[1];
@@ -91,7 +92,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             // println!("{:?}", word); // första ordet är a, andra är byte indexen
 
             let hash = hash(word);
-
 
             // println!("{:?}", metadata); // byte index in magic file of the first word
 
@@ -124,8 +124,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             } */
 
-            previous_hash = hash;
-
             /* index_file.write_at(
                 i * 10,
                 byte_index.parse::<u64>().unwrap(), /* .to_owned().as_bytes()[0] as u64  *//*&[u8]*/
@@ -134,9 +132,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         index_file.write(" ".as_bytes())?;
         index_file.write(byte_index.as_bytes())?;
+
+        if i % 10000 == 0 {
+            // tar runt ~200 ms för % 10000
+            println!("iteration: {:?} av {}", i, split_length);
+            println!("Tog: {:.2?}", start.elapsed());
+            start = Instant::now();
+        }
     }
 
-    println!("done"); 
+    println!("done");
 
     Ok(())
 }
