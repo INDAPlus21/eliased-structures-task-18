@@ -58,6 +58,7 @@ fn hash(to_hash: &str) -> u16 {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let mut very_start = Instant::now();
     let mut start = Instant::now();
 
     let mut index_file = File::create("index-file.txt")?;
@@ -70,10 +71,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     // println!("{:?}", hash("hello"));
 
     // To convert the byte slice back into a string slice, use the from_utf8 function.
-    // let mut total_bytes = 0;
+    let mut total_bytes = 0;
 
     let split = contents.split("\n");
     let split_length = split.to_owned().count();
+
+    let mut buffer_no: Vec<u8> = vec![];
+    let mut magic_buffer: Vec<u8> = vec![];
 
     for (i, line) in split.enumerate() {
         let temp_vec = line.split(" ").collect::<Vec<_>>();
@@ -85,12 +89,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         if previous_word != word {
             if i != 0 {
-                index_file.write("\n".as_bytes())?;
+                // index_file.write("\n".as_bytes())?;
+                buffer_no.append(&mut "\n".as_bytes().to_vec());
+                total_bytes += "\n".as_bytes().len()
             }
 
-            let metadata: u32 = index_file.metadata().unwrap().len() as u32;
+            // let mut meta_start = Instant::now();
+            // let metadata: u32 = index_file.metadata().unwrap().len() as u32;
+            // println!("Meta: {:.2?} totalt", meta_start.elapsed());
 
-            index_file.write(word.as_bytes())?;
+            // index_file.write(word.as_bytes())?;
+            buffer_no.append(&mut word.as_bytes().to_vec());
 
             previous_word = word;
             // println!("{:?}", word); // första ordet är a, andra är byte indexen
@@ -105,17 +114,25 @@ fn main() -> Result<(), Box<dyn Error>> {
             // magic_file.write(&hash.to_ne_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
 
             if previous_hash == hash {
-                magic_file.write(" ".as_bytes())?;
+                // magic_file.write(" ".as_bytes())?;
+                magic_buffer.append(&mut " ".as_bytes().to_vec());
                 // magic_file.write(&metadata.to_ne_bytes())?; // &transform_u32_to_array_of_u8(metadata));
             } else {
                 if i != 0 {
-                    magic_file.write("\n".as_bytes())?;
+                    // magic_file.write("\n".as_bytes())?;
+                    magic_buffer.append(&mut "\n".as_bytes().to_vec());
                 }
                 previous_hash = hash;
-                magic_file.write(&hash.to_string().as_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
-                magic_file.write(" ".as_bytes())?;
+                // magic_file.write(&hash.to_string().as_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
+                magic_buffer.append(&mut hash.to_string().as_bytes().to_vec());
+                // magic_file.write(" ".as_bytes())?;
+                magic_buffer.append(&mut " ".as_bytes().to_vec());
             }
-            magic_file.write(&metadata.to_string().as_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+
+            // magic_file.write(&total_bytes.to_string().as_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+            magic_buffer.append(&mut total_bytes.to_string().as_bytes().to_vec());
+            
+            total_bytes += word.as_bytes().len();
 
             // magic_file.write();
 
@@ -143,16 +160,26 @@ fn main() -> Result<(), Box<dyn Error>> {
             ); */
         }
 
-        index_file.write(" ".as_bytes())?;
-        index_file.write(byte_index.as_bytes())?;
+        // index_file.write(" ".as_bytes())?;
+        buffer_no.append(&mut " ".as_bytes().to_vec());
+        total_bytes += " ".as_bytes().len();
+        // index_file.write(byte_index.as_bytes())?;
+        buffer_no.append(&mut byte_index.as_bytes().to_vec());
+        total_bytes += byte_index.as_bytes().len();
 
         if i % 10000 == 0 {
             // tar runt ~200 ms för % 10000
             println!("iteration: {:?} av {}", i, split_length);
             println!("Tog: {:.2?}", start.elapsed());
             start = Instant::now();
+            index_file.write(&buffer_no)?;
+            magic_file.write(&magic_buffer)?;
+            buffer_no = vec![];
+            magic_buffer = vec![];
         }
     }
+
+    println!("Tog: {:.2?} totalt", very_start.elapsed());
 
     println!("done");
 

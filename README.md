@@ -1,0 +1,1 @@
+The concordance is the only thing that now works. Generate the files with cargo run in concordance/, and find words with concordance/find-word (with the korpus file in the concordance directory)
