@@ -6,7 +6,7 @@ concordance/find-word/korpus
 concordance/index-file.txt
 concordance/token.txt
 concordance/magic-file.txt
-korpus
+concordance/korpus.txt
 chasing-subs/target/
 multimatching/target/
 power-strings/target/

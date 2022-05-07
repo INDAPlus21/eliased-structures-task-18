@@ -42,6 +42,7 @@ The real requirement then is that a good hash function should distribute hash va
 
 */
 
+// det finns inga ord där de tre första bokstäverna är annorlunda (construed example)
 fn hash(to_hash: &str) -> u16 {
     // println!("{:?}", to_hash.as_bytes()[0]);
     let mut sum = 0;
@@ -53,6 +54,14 @@ fn hash(to_hash: &str) -> u16 {
     // let mut sum = to_hash.as_bytes()[0] as u16+to_hash.as_bytes()[1] as u16 +to_hash.as_bytes()[2] as u16;
     return sum;
 }
+
+/* fn transform_u32_to_array_of_u8(x:u32) -> [u8;4] {
+    let b1 : u8 = ((x >> 24) & 0xff) as u8;
+    let b2 : u8 = ((x >> 16) & 0xff) as u8;
+    let b3 : u8 = ((x >> 8) & 0xff) as u8;
+    let b4 : u8 = (x & 0xff) as u8;
+    return [b1, b2, b3, b4]
+} */
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello, world!");
@@ -84,10 +93,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     let contents: String = fs::read_to_string("token.txt")?.parse()?;
     let content_vec = contents.split("\n"); //.collect();
     let mut previous_word = ""; // &str;
-    // index_file.write("a".as_bytes());
+                                // index_file.write("a".as_bytes());
     let mut previous_hash = 0; // &str;
 
+    let mut total_bytes = 0;
+
     // println!("{:?}", hash("hello"));
+
+    // To convert the byte slice back into a string slice, use the from_utf8 function.
 
     for line in contents.split("\n") {
         let temp_vec = line.split(" ").collect::<Vec<_>>();
@@ -105,17 +118,38 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             let hash = hash(word);
 
-            if hash != previous_hash {
+            let metadata: u32 = index_file.metadata().unwrap().len() as u32;
+
+            println!("{:?}", metadata); // byte index in magic file of the first word
+
+            // and if the hash doesn't match exactly go to the next line in search...
+            // &transform_u32_to_array_of_u8(metadata)
+
+            // magic_file.write(&hash.to_ne_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
+            magic_file.write(&hash.to_string().as_bytes())?; // &transform_u32_to_array_of_u8// (metadata));
+            magic_file.write(" ".as_bytes())?;
+            // magic_file.write(&metadata.to_ne_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+            magic_file.write(&metadata.to_string().as_bytes())?; // &transform_u32_to_array_of_u8(metadata));
+            magic_file.write("\n".as_bytes());
+            // magic_file.write();
+
+            // ett alternativ till att kontinuerligt hålla koll på byte length
+            /* if hash != previous_hash {
                 for i in previous_hash + 1..hash {
                     // bytearray := []byte(strconv.FormatInt(stat.Size(), 10))
-                    let metadata = fs::metadata("index-file.txt")?;
-                    let size = metadata.len();
+                    // let metadata = fs::metadata("index-file.txt")?;
+
+                    let metadata = index_file.metadata().unwrap().len();
+
+
+                    println!("{:?}", metadata);
+                    // let size = metadata.len();
 
                     // let buffer = vec![0; 10]; // size.as_bytes(); //common_index_words[i];
                                               // write at the byte index calculated with hash
                     // magic_file.write(size as &[u8]);
                 }
-            }
+            } */
 
             previous_hash = hash;
 
