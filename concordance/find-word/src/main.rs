@@ -88,8 +88,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                             // lossy means that it replaces invalid characters with the "replacement character"
                             // which here means 
 
-                            let indexes_string = String::from_utf8_lossy(indexes);
+                            let indexes_string = String::from_utf8_lossy(indexes); // ::from_utf16_lossy(indexes); //
 
+                            /* if indexes_string.contains("�") {
+
+                            } */
                             // okay the cause is that � is treated as a space (?) 
 
                             let mut indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>();
@@ -119,7 +122,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                                 }
                             }
 
-                            println!("real {:?}", &real_indexes_array);
+                            // println!("real {:?}", &real_indexes_array);
 
                             // lite fin printing 
                             let times = real_indexes_array.len();
@@ -151,6 +154,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                                     break 'outer;
                                 }
                             }
+                            break 'outer; // löste vad du trodde var utf_16 problemet 
                         }
                     }
                 }
