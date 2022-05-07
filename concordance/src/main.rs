@@ -65,7 +65,7 @@ fn hash(to_hash: &str) -> u16 {
 
 fn main() -> Result<(), Box<dyn Error>> {
     println!("Hello, world!");
-    let mut token = File::open("token.txt");
+    // let token = File::open("token.txt");
 
     // index file is just token.txt without duplicate words
     // the large text file isn't needed, it's only token that is actually needed
@@ -120,7 +120,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             let metadata: u32 = index_file.metadata().unwrap().len() as u32;
 
-            println!("{:?}", metadata); // byte index in magic file of the first word
+            // println!("{:?}", metadata); // byte index in magic file of the first word
 
             // and if the hash doesn't match exactly go to the next line in search...
             // &transform_u32_to_array_of_u8(metadata)
@@ -167,6 +167,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // let size = metadata.size_of();
 
     // println!("{}", contents);
+    println!("done"); 
 
     Ok(())
 
