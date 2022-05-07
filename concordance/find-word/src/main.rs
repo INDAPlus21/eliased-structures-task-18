@@ -40,10 +40,24 @@ fn main() -> Result<(), Box<dyn Error>> {
             // println!("{}", magic_hash);
     
             if hash == magic_hash {
-                let indexes = &string_index_file.as_bytes()[byte_index+1..byte_index+100];
+                let indexes = &string_index_file.as_bytes()[byte_index+1..byte_index+10000];
                 let indexes_string =  String::from_utf8_lossy(indexes); 
                 let indexes_array: Vec<&str> = indexes_string.split(" ").collect(); //::<Vec&str>>(); 
-                println!("{:?}", String::from_utf8_lossy(indexes_array));
+                let mut real_indexes_array = vec![]; 
+
+                let mut index_array_iter = 0; 
+                println!("all {:?}", &indexes_array); 
+
+                for index in &indexes_array {
+                    if index.contains("\n") {
+                        println!("contains n {:?}", index_array_iter);
+                        real_indexes_array = indexes_array[0..index_array_iter].to_vec(); 
+                        break; 
+                    }
+                    index_array_iter += 1; 
+                }
+                // println!("{:?}", indexes_array); 
+                println!("real {:?}", &real_indexes_array); 
                 
                 println!("Ordet förekommer {:?} gånger i korpus", indexes_array.len()); 
                 let mut korpus_iter = 0; 
@@ -56,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     println!("{}", korpus_string); 
                     korpus_iter += 1; 
 
-                    if korpus_iter > 25 {
+                    if korpus_iter > 2 {
                         break 'outer;
                     }
                 }
