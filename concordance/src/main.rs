@@ -112,13 +112,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         if previous_word != word {
             index_file.write("\n".as_bytes());
+
+            let metadata: u32 = index_file.metadata().unwrap().len() as u32;
+            
             index_file.write(word.as_bytes());
             previous_word = word;
             // println!("{:?}", word); // första ordet är a, andra är byte indexen
 
             let hash = hash(word);
 
-            let metadata: u32 = index_file.metadata().unwrap().len() as u32;
 
             // println!("{:?}", metadata); // byte index in magic file of the first word
 
